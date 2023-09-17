@@ -11,7 +11,7 @@ module.exports.getUsers = (req, res) => {
       } else {
         res
           .status(500)
-          .send({ message: `Внутрення ошибка сервера: ${err.message} ` });
+          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
       }
     });
 };
@@ -31,7 +31,7 @@ module.exports.getUser = (req, res) => {
       } else {
         res
           .status(500)
-          .send({ message: `Внутрення ошибка сервера: ${err.message} ` });
+          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
       }
     });
 };
@@ -49,7 +49,7 @@ module.exports.createUser = (req, res) => {
       } else {
         res
           .status(500)
-          .send({ message: `Внунтрення ошибка сервера: ${err.message} ` });
+          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
       }
     });
 };
@@ -73,7 +73,7 @@ module.exports.updateUserAvatar = (req, res) => {
       } else {
         res
           .status(500)
-          .send({ message: `Внунтрення ошибка сервера: ${err.message} ` });
+          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
       }
     });
 };
@@ -95,7 +95,7 @@ module.exports.updateUserProfile = (req, res) => {
       } else {
         res
           .status(500)
-          .send({ message: `Внунтрення ошибка сервера: ${err.message} ` });
+          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
       }
     });
 };
