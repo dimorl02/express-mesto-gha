@@ -38,7 +38,15 @@ module.exports.getUser = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-
+  if (!name) {
+    res.status(400).send({ message: 'Переданы некорректные данные' });
+  }
+  if (!about) {
+    res.status(400).send({ message: 'Переданы некорректные данные' });
+  }
+  if (!avatar) {
+    res.status(400).send({ message: 'Переданы некорректные данные' });
+  }
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
     .catch((err) => {
