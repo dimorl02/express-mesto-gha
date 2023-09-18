@@ -7,14 +7,13 @@ module.exports.getUsers = (req, res) => {
       res
         .status(500)
         .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
-
     });
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail(() => new Error('NotFoundError'))
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         res
@@ -44,8 +43,7 @@ module.exports.createUser = (req, res) => {
     res.status(400).send({ message: 'Переданы некорректные данные' });
   }
   User.create({ name, about, avatar })
-
-    .then((user) => res.send(user))
+    .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
@@ -61,7 +59,6 @@ module.exports.createUser = (req, res) => {
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => new Error('NotFoundError'))
     .then((user) => res.send(user))
@@ -86,7 +83,6 @@ module.exports.updateUserAvatar = (req, res) => {
 
 module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
-
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => new Error('NotFoundError'))
     .then((user) => res.send(user))

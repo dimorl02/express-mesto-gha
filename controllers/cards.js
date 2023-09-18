@@ -1,6 +1,4 @@
 const { Card } = require('../models/card');
-const bodyParser = require('body-parser');
-
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -30,7 +28,7 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res, next) => {
+module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => res.send(card))
     .catch((err) => {

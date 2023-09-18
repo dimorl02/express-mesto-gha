@@ -3,9 +3,8 @@ const userRouter = require('./users');
 const cardRouter = require('./cards');
 
 const errorRouter = (req, res) => {
-  res.status(404).send({ message: 'зАпрашиваемый маршрут не найден' })
+  res.status(404).send({ message: 'Запрашиваемый маршрут не найден' })
 }
-
 
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
