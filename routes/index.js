@@ -8,6 +8,6 @@ const errorRouter = (req, res) => {
 
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
-router.use('*', errorRouter);
+router.use('/*', errorRouter);
 
 module.exports = router;
