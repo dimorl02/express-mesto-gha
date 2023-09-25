@@ -32,6 +32,9 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => res.send(card))
     .catch((err) => {
+      if (card.owner.id !== res.user._id) {
+        throw new Error('Нельзя удалить чужую карточку');
+      }
       if (err.name === 'CastError') {
         res
           .status(400)

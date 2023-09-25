@@ -1,8 +1,10 @@
 const express = require('express');
 
 const {
+  login,
   getUsers,
   getUser,
+  getCurrentUser,
   createUser,
   updateUserAvatar,
   updateUserProfile,
@@ -11,8 +13,9 @@ const {
 const users = express.Router();
 
 users.get('/', getUsers);
+users.get('/me', getCurrentUser);
 users.get('/:userId', getUser);
-users.post('/', createUser);
 users.patch('/:userId', updateUserAvatar);
 users.patch('/:userId', updateUserProfile);
+
 module.exports = users;

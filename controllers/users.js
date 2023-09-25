@@ -1,4 +1,29 @@
 const { User } = require('../models/user');
+const bcrypt = require('bcryptjs');
+
+const jwt = require('jsonwebtoken');
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  const user = User.findUserByCredentials(email, password);
+  if (!user) {
+    throw new Error('Неверные данные для входа');
+  }
+  const hasRightPassword = bcrypt.compare(password, user.password);
+  if (!hasRightPassword) {
+    throw new Error('Неверные данные для входа');
+  }
+  const token = jwt.sign(
+    {
+      _id: user._id,
+    },
+    'super-strong-secret',
+    {
+      expiresIn: '7d',
+    },
+  );
+  res.send({ jwt: token })
+}
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -9,6 +34,17 @@ module.exports.getUsers = (req, res) => {
         .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
     });
 };
+
+module.exports.getCurrentUser = (req, res, next) => {
+    const userId = req.user._id;
+    const user = User.findById(userId);
+
+    if (!user) {
+      throw new Error('Пользователь не найден');
+    }
+    res.send(user);
+}
+
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
@@ -32,7 +68,8 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { email, password, name, about, avatar, } = req.body;
+  const passwordHash = bcrypt.hash(password, 10);
   if (!name) {
     res.status(400).send({ message: 'Переданы некорректные данные' });
   }
@@ -42,7 +79,13 @@ module.exports.createUser = (req, res) => {
   if (!avatar) {
     res.status(400).send({ message: 'Переданы некорректные данные' });
   }
-  User.create({ name, about, avatar })
+  if (!email) {
+    res.status(400).send({ message: 'Переданы некорректные данные' });
+  }
+  if (!password) {
+    res.status(400).send({ message: 'Переданы некорректные данные' });
+  }
+  User.create({ email, password: passwordHash, name, about, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
