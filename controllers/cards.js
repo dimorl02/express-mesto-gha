@@ -1,5 +1,7 @@
 const { Card } = require('../models/card');
-
+const ValidationError = require('../errors/ValidationError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
@@ -17,9 +19,7 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные' });
+        throw new ValidationError('Переданы некорректные данные');
       } else {
         res
           .status(500)
@@ -29,25 +29,24 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (card.owner.id !== res.user._id) {
-        throw new Error('Нельзя удалить чужую карточку');
+  return Card.findByIdAndDelete(req.params.cardId)
+    .then((card) => {
+
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Запрещено удалять чужую карточку');
       }
       if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные' });
+        throw new ValidationError('Переданы некорректные данные');
       } else if (err.message === 'NotFoundError') {
-        res
-          .status(404)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res
           .status(500)
           .send({ message: `Внутренняяя ошибка сервера: ${err.message} ` });
       }
+    })
+    .catch((err) => {
+      next(err);
     });
 }
 
@@ -60,13 +59,9 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные' });
+        throw new ValidationError('Переданы некорректные данные');
       } else if (err.message === 'NotFoundError') {
-        res
-          .status(404)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res
           .status(500)
@@ -84,13 +79,9 @@ module.exports.dislikeCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные' });
+        throw new ValidationError('Переданы некорректные данные');
       } else if (err.message === 'NotFoundError') {
-        res
-          .status(404)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+        throw new NotFoundError('Карточка не найдена');
       } else {
         res
           .status(500)
