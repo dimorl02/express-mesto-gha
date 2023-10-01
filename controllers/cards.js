@@ -2,13 +2,12 @@ const { Card } = require('../models/card');
 const ValidationError = require('../errors/ValidationError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
+const InternalError = require('../errors/InternalError');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
     .catch((err) => {
-      res
-        .status(500)
-        .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
+      next(new InternalError('Внутренняя ошибка сервера'));
     });
 };
 
@@ -19,36 +18,29 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Переданы некорректные данные');
+        next(new ValidationError('Переданы некорректные данные'));
       } else {
-        res
-          .status(500)
-          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
+        next(new InternalError('Внутренняя ошибка сервера'));
       }
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  return Card.findByIdAndDelete(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .then((card) => {
-
-      if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Запрещено удалять чужую карточку');
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена'));
       }
-      if (err.name === 'CastError') {
-        throw new ValidationError('Переданы некорректные данные');
-      } else if (err.message === 'NotFoundError') {
-        throw new NotFoundError('Карточка не найдена');
+      if (card.owner.toString() === req.user._id) {
+        card.deleteOne(card)
+          .then((cards) => res.send(cards))
+          .catch(next);
       } else {
-        res
-          .status(500)
-          .send({ message: `Внутренняяя ошибка сервера: ${err.message} ` });
+        next(new ForbiddenError('Запрещено удалять чужую карточку'));
       }
     })
-    .catch((err) => {
-      next(err);
-    });
-}
+    .catch(next);
+};
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -59,13 +51,11 @@ module.exports.likeCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Переданы некорректные данные');
+        next(new ValidationError('Переданы некорректные данные'));
       } else if (err.message === 'NotFoundError') {
-        throw new NotFoundError('Карточка не найдена');
+        next(new NotFoundError('Карточка не найдена'));
       } else {
-        res
-          .status(500)
-          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
+        next(new InternalError('Внутренняя ошибка сервера'));
       }
     });
 };
@@ -79,13 +69,11 @@ module.exports.dislikeCard = (req, res) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError('Переданы некорректные данные');
+        next(new ValidationError('Переданы некорректные данные'));
       } else if (err.message === 'NotFoundError') {
-        throw new NotFoundError('Карточка не найдена');
+        next(new NotFoundError('Карточка не найдена'));
       } else {
-        res
-          .status(500)
-          .send({ message: `Внутренняя ошибка сервера: ${err.message} ` });
+        next(new InternalError('Внутренняя ошибка сервера'));
       }
     });
 }
