@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const { celebrate } = require('celebrate');
+const { errors } = require('celebrate');
 const errorHandler = require('./middlewares/errorHandler');
 const auth  = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
@@ -18,13 +18,13 @@ app.use(bodyParser.json());
 app.use('/signin', validateLogin, login);
 app.use('/signup', validateCreateUser, createUser);
 app.use(helmet());
-app.use(errorHandler);
+
 app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
-app.use(celebrate);
+app.use(errors());
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Данный путь не найден'));
 });
-
+app.use(errorHandler);
 app.listen(PORT);
