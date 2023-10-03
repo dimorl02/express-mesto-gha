@@ -1,11 +1,11 @@
 const { User } = require('../models/user');
 const bcrypt = require('bcryptjs');
-const ValidationError = require('../errors/ValidationError');
-const NotFoundError = require('../errors/NotFoundError');
-const ConflictError = require('../errors/ConflictError');
-const InternalError = require('../errors/InternalError');
+const { ValidationError } = require('../errors/ValidationError');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { ConflictError } = require('../errors/ConflictError');
+const { InternalError } = require('../errors/InternalError');
 const { SECRET_KEY = 'tokenkey' } = process.env;
-const UnauthorizedError = require('../errors/UnauthorizedError');
+const { UnauthorizedError } = require('../errors/UnauthorizedError');
 const jwt = require('jsonwebtoken');
 
 module.exports.login = (req, res, next) => {
@@ -24,7 +24,7 @@ module.exports.login = (req, res, next) => {
             });
             res.send({ token });
           } else {
-            throw new ErrorAuthorization('Неверный пароль');
+            throw new UnauthorizedError('Неверный пароль');
           }
         })
         .catch(next);
@@ -32,7 +32,7 @@ module.exports.login = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
@@ -53,7 +53,7 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((user) => res.send(user))
@@ -94,7 +94,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => new NotFoundError('Пользователь не найден'))
@@ -110,7 +110,7 @@ module.exports.updateUserAvatar = (req, res) => {
     });
 };
 
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => new NotFoundError('Пользователь не найден'))
