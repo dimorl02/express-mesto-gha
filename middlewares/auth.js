@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, SECRET_KEY);
   } catch (err) {
-    return new UnauthorizedError('Пользователь не авторизован');
+    throw new UnauthorizedError('Пользователь не авторизован');
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса
